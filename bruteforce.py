@@ -20,12 +20,69 @@ ACTIONS = {
     "action19": [24, 21],
     "action20": [114, 18],
 }
-MAX = 500
-best = ""
-for i in range(1,20):
-    
-for key in ACTIONS:
-    invest=ACTIONS[key][0]
-    if invest < 500:
-    for k2 in ACTIONS:
+ACTIONS_LIST = [
+    [20, 5],
+    [30, 10],
+    [50, 15],
+    [70, 20],
+    [60, 17],
+    [80, 25],
+    [22, 7],
+    [26, 11],
+    [48, 13],
+    [34, 27],
+    [42, 17],
+    [110, 9],
+    [38, 23],
+    [14, 1],
+    [18, 3],
+    [8, 8],
+    [4, 12],
+    [10, 14],
+    [24, 21],
+    [114, 18],
+]
+
+
+def invest(action_list, action_price, actual_value, action_buy, iter):
+    global best
+    iter += 1
+    old_value = actual_value
+    print("test")
+    print(old_value)
+    old_action_buy = action_buy
+    old_action_price = action_price
+    print("    " + str(iter))
+
+    for action_index in range(len(action_list)):
+        actual_value = old_value
+        action_buy = old_action_buy
+        action_price = old_action_price
+        print("+")
+
+        if action_index not in action_buy:
+            action_price += action_list[action_index][0]
+            if action_price < 500:
+                print(action_price)
+                actual_value[1] = action_price
+                actual_value[2] += ((action_list[action_index][1] * action_list[action_index][0]) / 100)
+                actual_value[0].append(action_index)
+                print(actual_value)
+                if actual_value[2] > best[2]:
+                    best = actual_value
+                action_buy.append(action_index)
+                invest(action_list, action_price, actual_value, action_buy, iter)
+
+
+    print("best")
+    print(best)
+    print("actual_value")
+    print(actual_value)
+    return best
+
+
+actual = [[], 0, 0]
+best = [[], 0, 0]
+
+print(invest(ACTIONS_LIST, 0, actual, [], 0))
 
