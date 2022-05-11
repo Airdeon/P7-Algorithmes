@@ -1,4 +1,5 @@
 from copy import deepcopy
+from time import time
 
 ACTIONS = {
     "action1": [20, 5],
@@ -44,81 +45,91 @@ ACTIONS_LIST = [
     [24, 21],
     [114, 18],
 ]
+TRY_LIST = [
+    [30, 10],
+    [50, 15],
+    [70, 20],
+    [60, 17],
+    [80, 25],
+    [26, 11],
+    [48, 13],
+    [34, 27],
+    [42, 17],
+    [110, 9],
+    [38, 23],
+    [4, 12],
+    [10, 14],
+    [24, 21],
+    [114, 18],
+]
 
 
-def invest2(action_list):
+"""def invest2(action_list, actual_value):
     global best
-    action_buy = []
-    for action_index in range(len(action_list)):
-        if action_index not in action_buy:
-            if action_price + action_list[action_index][0] < 500:
-                action_price += action_list[action_index][0]
-                action_buy.append(action_index)
-                actual_value[0].append(action_index)
-                actual_value[1] = action_price
-                actual_value[2] += (action_list[action_index][1] * action_list[action_index][0]) / 100
-                if actual_value[2] > best[2]:
-                    best = actual_value
-                invest2(action_list, action_price, actual_value, action_buy)
-
-
-def invest(action_list, action_price, actual_value, action_buy, iter):
-    global best
-    iter += 1
-    old_action_price = deepcopy(action_price)
+    global action_test
     old_actual_value = deepcopy(actual_value)
-    old_action_buy = deepcopy(action_buy)
-    old_iter = deepcopy(iter)
-
-    print("                                   " + str(iter))
-    b = 0
     for action_index in range(len(action_list)):
-        print("                                   " + str(iter))
-        print("                                               " + str(action_index))
-        print("old_actual_value " + str(old_actual_value))
+        action_test += 1
+        print(action_test)
         new_actual_value = old_actual_value
-        print("actual_value " + str(new_actual_value))
-        new_action_buy = old_action_buy
-        new_action_price = old_action_price
-        b += 1
-        print("boucle" + str(b))
-        if action_index not in new_action_buy:
-            if new_action_price + action_list[action_index][0] < 500:
-                new_action_price += action_list[action_index][0]
-                print("buy action " + str(action_index))
-                print(new_action_price)
+        if action_index not in new_actual_value[0]:
+            if new_actual_value[1] + action_list[action_index][0] < 500:
+                new_actual_value[1] += action_list[action_index][0]
                 new_actual_value[0].append(action_index)
-                new_actual_value[1] = new_action_price
                 new_actual_value[2] += (action_list[action_index][1] * action_list[action_index][0]) / 100
-                print("new_actual_value " + str(new_actual_value))
                 if new_actual_value[2] > best[2]:
                     best = new_actual_value
-                new_action_buy.append(action_index)
-                invest(action_list, new_action_price, new_actual_value, new_action_buy, old_iter)
+                invest(action_list, new_actual_value)
 
                 del new_actual_value[0][-1]
-                new_actual_value[1] = new_action_price - action_list[action_index][0]
-                new_actual_value[2] -= (action_list[action_index][1] * action_list[action_index][0]) / 100
-            else:
-                print("too expensive " + str(new_action_price + action_list[action_index][0]))
-
-        else:
-            print("already buy")
+                new_actual_value[1] -= action_list[action_index][0]
+                new_actual_value[2] -= (action_list[action_index][1] * action_list[action_index][0]) / 100"""
 
 
-    print("best")
-    print(best)
-    print("actual_value")
-    print(actual_value)
-    return(best)
+def invest(action_list, actual_value, best):
+    global action_test
+    if len(actual_value[0]) == 0:
+        last = 0
+    else:
+        last = actual_value[0][-1]
+    for action_index in range(last, len(action_list)):
+        if action_index not in actual_value[0]:
+            if actual_value[1] + action_list[action_index][0] < 500:
+                action_test += 1
+                print(action_test)
+                actual_value[1] += action_list[action_index][0]
+                actual_value[0].append(action_index)
+                actual_value[2] += (action_list[action_index][1] * action_list[action_index][0]) / 100
+                print(actual_value[2])
+                print(best[2])
+                if actual_value[2] > best[2]:
+                    print("best beford")
+                    print(best)
+                    best = actual_value
+                    print("best")
+                    print(best)
+                print("actual")
+                print(actual_value)
+                invest(action_list, actual_value, best)
+
+                del actual_value[0][-1]
+                actual_value[1] -= action_list[action_index][0]
+                actual_value[2] -= (action_list[action_index][1] * action_list[action_index][0]) / 100
+
+    return best
 
 
+action_test = 0
 actual = [[], 0, 0]
-best = [[], 0, 0]
 
 
 def main():
-    print(invest(ACTIONS_LIST, 0, actual, [], 0))
+    best = [[], 0, 0]
+    start = time()  # start time counter
+    print(invest(TRY_LIST, actual, best))
+    end = time()
+    temps = int(end - start)
+    print("duré du calcule : " + str(temps) + "s")
 
 
 if __name__ == "__main__":
