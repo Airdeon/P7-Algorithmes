@@ -1,0 +1,95 @@
+from copy import deepcopy
+from datetime import datetime
+from functools import lru_cache
+from operator import itemgetter
+
+ACTIONS_LIST = [
+    ["action 1", 20, 5],
+    ["action 2", 30, 10],
+    ["action 3", 50, 15],
+    ["action 4", 70, 20],
+    ["action 5", 60, 17],
+    ["action 6", 80, 25],
+    ["action 7", 22, 7],
+    ["action 8", 26, 11],
+    ["action 9", 48, 13],
+    ["action 10", 34, 27],
+    ["action 11", 42, 17],
+    ["action 12", 110, 9],
+    ["action 13", 38, 23],
+    ["action 14", 14, 1],
+    ["action 15", 18, 3],
+    ["action 16", 8, 8],
+    ["action 17", 4, 12],
+    ["action 18", 10, 14],
+    ["action 19", 24, 21],
+    ["action 20", 114, 18],
+]
+
+
+def invest_dynamique(max_price, actions_list):
+    # calcul action gain ((value * pourcentage) / 100)
+    for index in range(len(actions_list)):
+        actions_list[index][2] = (actions_list[index][2] * actions_list[index][1]) / 100
+
+    # build matrix
+    matrix = [[0 for x in range(max_price + 1)] for x in range(len(actions_list) + 1)]
+
+    # populate matrix
+    for i in range(1, len(actions_list) + 1):
+        for w in range(1, max_price + 1):
+            if actions_list[i - 1][1] <= w:
+                matrix[i][w] = max(actions_list[i - 1][2] + matrix[i - 1][w - actions_list[i - 1][1]], matrix[i - 1][w])
+            else:
+                matrix[i][w] = matrix[i - 1][w]
+
+        action_number = len(actions_list)
+        action_buy = []
+        total_price = 0
+
+    # find best combo
+    while max_price >= 0 and action_number >= 0:
+        e = actions_list[action_number - 1]
+        if matrix[action_number][max_price] == matrix[action_number - 1][max_price - e[1]] + e[2]:
+            action_buy.append(e[0])
+            total_price += e[1]
+            max_price -= e[1]
+        action_number -= 1
+
+    return [action_buy, total_price, matrix[-1][-1]]
+
+
+def glouton(action_list):
+    gain_price = []
+    index = 0
+    buy_action = [[], 0, 0]
+    for action in action_list:
+        gain_price.append([index, (action[1] * action[0] / 100) / action[0]])
+        index += 1
+    action_list_sorted_by_gain_ratio = sorted(gain_price, key=itemgetter(1), reverse=True)
+    for action_index in action_list_sorted_by_gain_ratio:
+        if buy_action[1] + action_list[action_index[0]][0] < 500:
+            buy_action[0].append(action_index[0])
+            buy_action[1] += action_list[action_index[0]][0]
+            buy_action[2] += (action_list[action_index[0]][0] * action_list[action_index[0]][1]) / 100
+
+    return buy_action
+
+
+best = [[], 0, 0]
+
+
+def main():
+    start = datetime.now()  # start time counter
+    # result = glouton(ACTIONS_LIST)
+    result = invest_dynamique(500, ACTIONS_LIST)
+    end = datetime.now()
+    temps = end - start
+    print("Nom des actions à acheter : " + str(result[0]))
+    print("Montant total des actions : " + str(result[1]))
+    print("Gain total des actions apres 2 ans : " + str(round(result[2], 2)))
+    print("duré du calcule : " + str(temps.total_seconds() * 1000) + "ms")
+
+
+if __name__ == "__main__":
+    main()
