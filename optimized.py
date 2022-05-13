@@ -1,7 +1,6 @@
-from copy import deepcopy
 from datetime import datetime
-from functools import lru_cache
 from operator import itemgetter
+import csv
 
 ACTIONS_LIST = [
     ["action 1", 20, 5],
@@ -29,8 +28,18 @@ ACTIONS_LIST = [
 
 def invest_dynamique(max_price, actions_list):
     # calcul action gain ((value * pourcentage) / 100)
+    delete_list = []
     for index in range(len(actions_list)):
-        actions_list[index][2] = (actions_list[index][2] * actions_list[index][1]) / 100
+        if actions_list[index][1] <= 0 or actions_list[index][2] <= 0:
+            delete_list.append(index)
+        else:
+            actions_list[index][2] = (actions_list[index][2] * actions_list[index][1]) / 100
+            # price in Integer
+            actions_list[index][1] = int(actions_list[index][1] * 100)
+    for index in sorted(delete_list, reverse=True):
+        del actions_list[index]
+    max_price *= 100
+
 
     # build matrix
     matrix = [[0 for x in range(max_price + 1)] for x in range(len(actions_list) + 1)]
@@ -56,39 +65,56 @@ def invest_dynamique(max_price, actions_list):
             max_price -= e[1]
         action_number -= 1
 
-    return [action_buy, total_price, matrix[-1][-1]]
+    return [action_buy, (total_price / 100), matrix[-1][-1]]
 
 
-def glouton(action_list):
+def glouton(actions_list):
+    delete_list = []
+    for index in range(len(actions_list)):
+        if actions_list[index][1] <= 0 or actions_list[index][2] <= 0:
+            delete_list.append(index)
+    for index in sorted(delete_list, reverse=True):
+        del actions_list[index]
     gain_price = []
     index = 0
     buy_action = [[], 0, 0]
-    for action in action_list:
-        gain_price.append([index, (action[1] * action[0] / 100) / action[0]])
+    for action in actions_list:
+        gain_price.append([index, (action[2] * action[1] / 100) / action[1]])
         index += 1
     action_list_sorted_by_gain_ratio = sorted(gain_price, key=itemgetter(1), reverse=True)
     for action_index in action_list_sorted_by_gain_ratio:
-        if buy_action[1] + action_list[action_index[0]][0] < 500:
-            buy_action[0].append(action_index[0])
-            buy_action[1] += action_list[action_index[0]][0]
-            buy_action[2] += (action_list[action_index[0]][0] * action_list[action_index[0]][1]) / 100
+        if buy_action[1] + actions_list[action_index[0]][1] < 500:
+            buy_action[0].append(actions_list[action_index[0]][0])
+            buy_action[1] += actions_list[action_index[0]][1]
+            buy_action[2] += (actions_list[action_index[0]][1] * actions_list[action_index[0]][2]) / 100
 
     return buy_action
 
 
 best = [[], 0, 0]
 
+def read_csv(file):
+    with open(file, newline='') as csvfile:
+        csv_read = csv.reader(csvfile)
+        actions_list = list(csv_read)
+        del actions_list[0]
+        for index in range(len(actions_list)):
+            actions_list[index][1] = float(actions_list[index][1])
+            actions_list[index][2] = float(actions_list[index][2])
+        return actions_list
+
 
 def main():
+    action_list = read_csv("dataset2_Python+P7.csv")
     start = datetime.now()  # start time counter
-    # result = glouton(ACTIONS_LIST)
-    result = invest_dynamique(500, ACTIONS_LIST)
+    #result = glouton(action_list)
+    result = invest_dynamique(500, action_list)
     end = datetime.now()
     temps = end - start
     print("Nom des actions à acheter : " + str(result[0]))
     print("Montant total des actions : " + str(result[1]))
     print("Gain total des actions apres 2 ans : " + str(round(result[2], 2)))
-    print("duré du calcule : " + str(temps.total_seconds() * 1000) + "ms")
+    print("duré du calcule : " + str(round(temps.total_seconds(), 2) * 1000) + "ms")
 
 
 if __name__ == "__main__":
