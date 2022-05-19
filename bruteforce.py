@@ -53,7 +53,7 @@ def invest2(action_list, actual_value):
     if len(actual_value[0]) == 0:
         last = 0
     else:
-        last = len(actual_value[0])
+        last = int(actual_value[0][-1][7:]) - 1
     for action_index in range(last, len(action_list)):
 
         if action_list[action_index][0] not in actual_value[0]:
@@ -64,9 +64,11 @@ def invest2(action_list, actual_value):
 
                 if actual_value[2] > best[2]:
                     best = deepcopy(actual_value)
-                    print(best)
-                invest(action_list, actual_value)
+
+                invest2(action_list, actual_value)
+
                 del actual_value[0][-1]
+
                 actual_value[1] -= action_list[action_index][1]
                 actual_value[2] -= (action_list[action_index][2] * action_list[action_index][1]) / 100
     return best
@@ -100,9 +102,12 @@ def main():
     start = datetime.now()  # start time counter
     actual = [[], 0, 0]
     result = invest(ACTIONS_LIST, actual)
+    for index in range(len(result[0])):
+        best[0][index] += 1
+    # result = invest2(ACTIONS_LIST2, actual)
     end = datetime.now()
     temps = end - start
-    print("index des actions à acheter : " + str(result[0]))
+    print("Numero des actions à acheter : " + str(result[0]))
     print("Montant total des actions : " + str(result[1]))
     print("Gain total des actions apres 2 ans : " + str(round(result[2], 2)))
     print("duré du calcule : " + str(round(temps.total_seconds() * 1000)) + "ms")

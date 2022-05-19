@@ -26,6 +26,46 @@ ACTIONS_LIST = [
 ]
 
 
+def invest_dynamique_less_precision(max_price, actions_list):
+    # calcul action gain ((value * pourcentage) / 100)
+    delete_list = []
+    for index in range(len(actions_list)):
+        if actions_list[index][1] <= 0 or actions_list[index][2] <= 0:
+            delete_list.append(index)
+        else:
+            actions_list[index][2] = (actions_list[index][2] * actions_list[index][1]) / 100
+            # price in Integer
+            actions_list[index][1] = round(actions_list[index][1])
+    for index in sorted(delete_list, reverse=True):
+        del actions_list[index]
+
+    # build matrix
+    matrix = [[0 for x in range(max_price + 1)] for x in range(len(actions_list) + 1)]
+
+    # populate matrix
+    for i in range(1, len(actions_list) + 1):
+        for w in range(1, max_price + 1):
+            if actions_list[i - 1][1] <= w:
+                matrix[i][w] = max(actions_list[i - 1][2] + matrix[i - 1][w - actions_list[i - 1][1]], matrix[i - 1][w])
+            else:
+                matrix[i][w] = matrix[i - 1][w]
+
+        action_number = len(actions_list)
+        action_buy = []
+        total_price = 0
+
+    # find best combo
+    while max_price >= 0 and action_number >= 0:
+        e = actions_list[action_number - 1]
+        if matrix[action_number][max_price] == matrix[action_number - 1][max_price - e[1]] + e[2]:
+            action_buy.append(e[0])
+            total_price += e[1]
+            max_price -= e[1]
+        action_number -= 1
+
+    return [action_buy, (total_price), matrix[-1][-1]]
+
+
 def invest_dynamique(max_price, actions_list):
     # calcul action gain ((value * pourcentage) / 100)
     delete_list = []
@@ -39,7 +79,6 @@ def invest_dynamique(max_price, actions_list):
     for index in sorted(delete_list, reverse=True):
         del actions_list[index]
     max_price *= 100
-
 
     # build matrix
     matrix = [[0 for x in range(max_price + 1)] for x in range(len(actions_list) + 1)]
@@ -93,8 +132,9 @@ def glouton(actions_list):
 
 best = [[], 0, 0]
 
+
 def read_csv(file):
-    with open(file, newline='') as csvfile:
+    with open(file, newline="") as csvfile:
         csv_read = csv.reader(csvfile)
         actions_list = list(csv_read)
         del actions_list[0]
@@ -107,8 +147,9 @@ def read_csv(file):
 def main():
     action_list = read_csv("dataset2_Python+P7.csv")
     start = datetime.now()  # start time counter
-    #result = glouton(action_list)
+    # result = glouton(action_list)
     result = invest_dynamique(500, action_list)
+    # result = invest_dynamique_less_precision(500, action_list)
     end = datetime.now()
     temps = end - start
     print("Nom des actions à acheter : " + str(result[0]))
