@@ -147,8 +147,8 @@ def read_csv(file):
 def main():
     action_list = read_csv("dataset2_Python+P7.csv")
     start = datetime.now()  # start time counter
-    # result = glouton(action_list)
-    result = invest_dynamique(500, action_list)
+    result = glouton(ACTIONS_LIST)
+    # result = invest_dynamique(500, action_list)
     # result = invest_dynamique_less_precision(500, action_list)
     end = datetime.now()
     temps = end - start

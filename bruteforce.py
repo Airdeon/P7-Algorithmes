@@ -101,10 +101,10 @@ best = [[], 0, 0]
 def main():
     start = datetime.now()  # start time counter
     actual = [[], 0, 0]
-    result = invest(ACTIONS_LIST, actual)
+    """result = invest(ACTIONS_LIST, actual)
     for index in range(len(result[0])):
-        best[0][index] += 1
-    # result = invest2(ACTIONS_LIST2, actual)
+        best[0][index] += 1"""
+    result = invest2(ACTIONS_LIST2, actual)
     end = datetime.now()
     temps = end - start
     print("Numero des actions à acheter : " + str(result[0]))
