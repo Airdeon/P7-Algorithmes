@@ -36,6 +36,7 @@ def invest_dynamique_less_precision(max_price, actions_list):
             actions_list[index][2] = (actions_list[index][2] * actions_list[index][1]) / 100
             # price in Integer
             actions_list[index][1] = round(actions_list[index][1])
+    # deletion of unnecessary actions
     for index in sorted(delete_list, reverse=True):
         del actions_list[index]
 
@@ -43,12 +44,12 @@ def invest_dynamique_less_precision(max_price, actions_list):
     matrix = [[0 for x in range(max_price + 1)] for x in range(len(actions_list) + 1)]
 
     # populate matrix
-    for i in range(1, len(actions_list) + 1):
-        for w in range(1, max_price + 1):
-            if actions_list[i - 1][1] <= w:
-                matrix[i][w] = max(actions_list[i - 1][2] + matrix[i - 1][w - actions_list[i - 1][1]], matrix[i - 1][w])
+    for action in range(1, len(actions_list) + 1):
+        for price in range(1, max_price + 1):
+            if actions_list[action - 1][1] <= price:
+                matrix[action][price] = max(actions_list[action - 1][2] + matrix[action - 1][price - actions_list[action - 1][1]], matrix[action - 1][price])
             else:
-                matrix[i][w] = matrix[i - 1][w]
+                matrix[action][price] = matrix[action - 1][price]
 
         action_number = len(actions_list)
         action_buy = []
@@ -76,6 +77,7 @@ def invest_dynamique(max_price, actions_list):
             actions_list[index][2] = (actions_list[index][2] * actions_list[index][1]) / 100
             # price in Integer
             actions_list[index][1] = int(actions_list[index][1] * 100)
+    # deletion of unnecessary actions
     for index in sorted(delete_list, reverse=True):
         del actions_list[index]
     max_price *= 100
@@ -84,12 +86,12 @@ def invest_dynamique(max_price, actions_list):
     matrix = [[0 for x in range(max_price + 1)] for x in range(len(actions_list) + 1)]
 
     # populate matrix
-    for i in range(1, len(actions_list) + 1):
-        for w in range(1, max_price + 1):
-            if actions_list[i - 1][1] <= w:
-                matrix[i][w] = max(actions_list[i - 1][2] + matrix[i - 1][w - actions_list[i - 1][1]], matrix[i - 1][w])
+    for action in range(1, len(actions_list) + 1):
+        for price in range(1, max_price + 1):
+            if actions_list[action - 1][1] <= price:
+                matrix[action][price] = max(actions_list[action - 1][2] + matrix[action - 1][price - actions_list[action - 1][1]], matrix[action - 1][price])
             else:
-                matrix[i][w] = matrix[i - 1][w]
+                matrix[action][price] = matrix[action - 1][price]
 
         action_number = len(actions_list)
         action_buy = []
@@ -108,12 +110,15 @@ def invest_dynamique(max_price, actions_list):
 
 
 def glouton(actions_list):
+    # deletion of unnecessary actions
     delete_list = []
     for index in range(len(actions_list)):
         if actions_list[index][1] <= 0 or actions_list[index][2] <= 0:
             delete_list.append(index)
     for index in sorted(delete_list, reverse=True):
         del actions_list[index]
+
+    # sort by gain ratio
     gain_price = []
     index = 0
     buy_action = [[], 0, 0]
@@ -121,6 +126,8 @@ def glouton(actions_list):
         gain_price.append([index, (action[2] * action[1] / 100) / action[1]])
         index += 1
     action_list_sorted_by_gain_ratio = sorted(gain_price, key=itemgetter(1), reverse=True)
+
+    # Buy the best actions until max price
     for action_index in action_list_sorted_by_gain_ratio:
         if buy_action[1] + actions_list[action_index[0]][1] < 500:
             buy_action[0].append(actions_list[action_index[0]][0])
@@ -134,6 +141,7 @@ best = [[], 0, 0]
 
 
 def read_csv(file):
+    """ Read CSV File and make list with float number """
     with open(file, newline="") as csvfile:
         csv_read = csv.reader(csvfile)
         actions_list = list(csv_read)
@@ -147,10 +155,17 @@ def read_csv(file):
 def main():
     action_list = read_csv("dataset2_Python+P7.csv")
     start = datetime.now()  # start time counter
-    result = glouton(ACTIONS_LIST)
-    # result = invest_dynamique(500, action_list)
+
+    # Lancement de l'algorithme Glouton
+    # result = glouton(action_list)
+
+    # Lancement de l'algorithme Programmation dynamique
+    result = invest_dynamique(500, action_list)
+
+    # Lancement de l'algorithme Programmation dynamique avec une précision reduite
     # result = invest_dynamique_less_precision(500, action_list)
-    end = datetime.now()
+
+    end = datetime.now()  # end time counter
     temps = end - start
     print("Nom des actions à acheter : " + str(result[0]))
     print("Montant total des actions : " + str(result[1]))
