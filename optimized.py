@@ -47,7 +47,9 @@ def invest_dynamique_less_precision(max_price, actions_list):
     for action in range(1, len(actions_list) + 1):
         for price in range(1, max_price + 1):
             if actions_list[action - 1][1] <= price:
-                matrix[action][price] = max(actions_list[action - 1][2] + matrix[action - 1][price - actions_list[action - 1][1]], matrix[action - 1][price])
+                matrix[action][price] = max(
+                    actions_list[action - 1][2] + matrix[action - 1][price - actions_list[action - 1][1]], matrix[action - 1][price]
+                )
             else:
                 matrix[action][price] = matrix[action - 1][price]
 
@@ -57,11 +59,11 @@ def invest_dynamique_less_precision(max_price, actions_list):
 
     # find best combo
     while max_price >= 0 and action_number >= 0:
-        e = actions_list[action_number - 1]
-        if matrix[action_number][max_price] == matrix[action_number - 1][max_price - e[1]] + e[2]:
-            action_buy.append(e[0])
-            total_price += e[1]
-            max_price -= e[1]
+        action = actions_list[action_number - 1]
+        if matrix[action_number][max_price] == matrix[action_number - 1][max_price - action[1]] + action[2]:
+            action_buy.append(action[0])
+            total_price += action[1]
+            max_price -= action[1]
         action_number -= 1
 
     return [action_buy, (total_price), matrix[-1][-1]]
@@ -89,7 +91,9 @@ def invest_dynamique(max_price, actions_list):
     for action in range(1, len(actions_list) + 1):
         for price in range(1, max_price + 1):
             if actions_list[action - 1][1] <= price:
-                matrix[action][price] = max(actions_list[action - 1][2] + matrix[action - 1][price - actions_list[action - 1][1]], matrix[action - 1][price])
+                matrix[action][price] = max(
+                    actions_list[action - 1][2] + matrix[action - 1][price - actions_list[action - 1][1]], matrix[action - 1][price]
+                )
             else:
                 matrix[action][price] = matrix[action - 1][price]
 
@@ -99,11 +103,11 @@ def invest_dynamique(max_price, actions_list):
 
     # find best combo
     while max_price >= 0 and action_number >= 0:
-        e = actions_list[action_number - 1]
-        if matrix[action_number][max_price] == matrix[action_number - 1][max_price - e[1]] + e[2]:
-            action_buy.append(e[0])
-            total_price += e[1]
-            max_price -= e[1]
+        action = actions_list[action_number - 1]
+        if matrix[action_number][max_price] == matrix[action_number - 1][max_price - action[1]] + action[2]:
+            action_buy.append(action[0])
+            total_price += action[1]
+            max_price -= action[1]
         action_number -= 1
 
     return [action_buy, (total_price / 100), matrix[-1][-1]]
@@ -141,7 +145,7 @@ best = [[], 0, 0]
 
 
 def read_csv(file):
-    """ Read CSV File and make list with float number """
+    """Read CSV File and make list with float number"""
     with open(file, newline="") as csvfile:
         csv_read = csv.reader(csvfile)
         actions_list = list(csv_read)
